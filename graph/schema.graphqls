@@ -5,11 +5,16 @@ type User {
 }
 
 type AuthPayload {
-  token: String!
   user: User!
+}
+
+type LoginResponse {
+  success: Boolean!
+  message: String!
+
 }
 
 type Mutation {
   register(username: String!, email: String!, password: String!): AuthPayload!
-  login(email: String!, password: String!): AuthPayload!
+  login(email: String!, password: String!): LoginResponse!
 }

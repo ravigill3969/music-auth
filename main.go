@@ -5,6 +5,8 @@ import (
 	"log"
 	"music-auth/graph"
 	"music-auth/internal/auth"
+	middleware "music-auth/internal/middlware"
+
 	"net/http"
 	"os"
 
@@ -45,9 +47,9 @@ func main() {
 
 	resolver := &graph.Resolver{AuthService: authService}
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		AuthService: resolver.AuthService,
-	}}))
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{
+		Resolvers: resolver,
+	}))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -61,7 +63,7 @@ func main() {
 	})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/query", middleware.ResponseWriterMiddleware(srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

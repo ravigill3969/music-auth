@@ -8,16 +8,66 @@ import (
 	"context"
 	"fmt"
 	"music-auth/graph/model"
+	middleware "music-auth/internal/middlware"
+	"net/http"
 )
 
 // Register is the resolver for the register field.
 func (r *mutationResolver) Register(ctx context.Context, username string, email string, password string) (*model.AuthPayload, error) {
-	panic(fmt.Errorf("not implemented: Register - register"))
+	token, user, err := r.AuthService.RegisterUser(username, email, password)
+	if err != nil {
+		return nil, err
+	}
+
+	rw := middleware.GetResponseWriter(ctx)
+	if rw == nil {
+		return nil, fmt.Errorf("could not get response writer")
+	}
+
+	http.SetCookie(rw, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		HttpOnly: true,
+		Secure:   false,
+		Path:     "/",
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	return &model.AuthPayload{
+
+		User: &model.User{
+			ID:       user.ID.String(),
+			Email:    user.Email,
+			Username: user.Username,
+		},
+	}, nil
 }
 
-// Login is the resolver for the login field.
-func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*model.AuthPayload, error) {
-	panic(fmt.Errorf("not implemented: Login - login"))
+
+func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*model.LoginResponse, error) {
+	token, err := r.AuthService.Login(email, password)
+	if err != nil {
+		return nil, err
+	}
+
+	rw := middleware.GetResponseWriter(ctx)
+	if rw == nil {
+		return nil, fmt.Errorf("could not get response writer")
+	}
+
+	http.SetCookie(rw, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		HttpOnly: true,
+		Secure:   false,
+		Path:     "/",
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	return &model.LoginResponse{
+		Success: true,
+		Message: "Logged in successfully",
+	}, nil
 }
 
 // Mutation returns MutationResolver implementation.
@@ -32,12 +82,5 @@ type mutationResolver struct{ *Resolver }
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
 /*
-	func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
-}
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
-}
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
-type queryResolver struct{ *Resolver }
+	func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 */
