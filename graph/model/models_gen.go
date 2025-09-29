@@ -6,6 +6,20 @@ type AuthPayload struct {
 	User *User `json:"user"`
 }
 
+type GetUser struct {
+	ID          string  `json:"id"`
+	Username    string  `json:"username"`
+	Email       string  `json:"email"`
+	AccountType string  `json:"account_type"`
+	EndingDate  *string `json:"ending_date,omitempty"`
+}
+
+type GetUserInfoResponse struct {
+	Success bool     `json:"success"`
+	Message string   `json:"message"`
+	User    *GetUser `json:"user,omitempty"`
+}
+
 type LoginResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`

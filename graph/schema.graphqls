@@ -1,3 +1,5 @@
+scalar Date
+
 type User {
   id: ID!
   username: String!
@@ -11,7 +13,24 @@ type AuthPayload {
 type LoginResponse {
   success: Boolean!
   message: String!
+}
 
+type GetUser {
+  id: ID!
+  username: String!
+  email: String!
+  account_type: String!
+  ending_date: Date
+}
+
+type GetUserInfoResponse {
+  success: Boolean!
+  message: String!
+  user: GetUser
+}
+
+type Query {
+  getUserInfo: GetUserInfoResponse!
 }
 
 type Mutation {

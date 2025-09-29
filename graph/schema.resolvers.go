@@ -43,7 +43,7 @@ func (r *mutationResolver) Register(ctx context.Context, username string, email 
 	}, nil
 }
 
-
+// Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*model.LoginResponse, error) {
 	token, err := r.AuthService.Login(email, password)
 	if err != nil {
@@ -70,10 +70,29 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	}, nil
 }
 
+// GetUserInfo is the resolver for the getUserInfo field.
+func (r *queryResolver) GetUserInfo(ctx context.Context) (*model.GetUserInfoResponse, error) {
+	user, err := r.AuthService.GetUserInfo(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.GetUserInfoResponse{
+		Success: true,
+		Message: "User info reterieved",
+		User:    user.User,
+	}, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
+// Query returns QueryResolver implementation.
+func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+
 type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
 
 // !!! WARNING !!!
 // The code below was going to be deleted when updating resolvers. It has been copied here so you have
@@ -82,5 +101,7 @@ type mutationResolver struct{ *Resolver }
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
 /*
-	func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+	func (r *mutationResolver) GetUserInfo(ctx context.Context) (*model.GetUserInfoResponse, error) {
+	panic(fmt.Errorf("not implemented: GetUserInfo - getUserInfo"))
+}
 */

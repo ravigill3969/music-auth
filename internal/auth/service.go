@@ -1,9 +1,12 @@
 package auth
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"music-auth/graph/model"
+	middleware "music-auth/internal/middlware"
 
 	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
@@ -13,6 +16,9 @@ type AuthService struct {
 	db        *sql.DB
 	jwtSecret []byte
 }
+
+const HTTPRequest = "httpRequest"
+const HTTPResponseWriter = "httpResponseWriter"
 
 func New(db *sql.DB, jwt_secret string) *AuthService {
 	return &AuthService{db: db, jwtSecret: []byte(jwt_secret)}
@@ -74,16 +80,60 @@ func (a *AuthService) Login(email, password string) (string, error) {
 		return "", err
 	}
 
-	// Compare password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
 		return "", errors.New("invalid password")
 	}
 
-	// Generate JWT
 	token, err := a.GenerateToken(&user)
 	if err != nil {
 		return "", err
 	}
 
 	return token, nil
+}
+
+func (r *AuthService) GetUserInfo(ctx context.Context) (*model.GetUserInfoResponse, error) {
+	claims, ok := middleware.GetUserFromCtx(ctx)
+	if !ok {
+		return &model.GetUserInfoResponse{
+			Success: false,
+			Message: "unauthorized",
+			User:    nil,
+		}, nil
+	}
+
+	userID := claims["user_id"].(string)
+
+	query := `
+    SELECT id, username, email, subscription_type, ending_subscription_date
+    FROM users
+    WHERE id = $1
+`
+
+	var user model.GetUser
+	err := r.db.QueryRow(query, userID).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.AccountType,
+		&user.EndingDate,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, fmt.Errorf("db error: %w", err)
+	}
+
+	return &model.GetUserInfoResponse{
+		Success: true,
+		User: &model.GetUser{
+			ID:          user.ID,
+			Username:    user.Username,
+			Email:       user.Email,
+			AccountType: user.AccountType,
+			EndingDate:  user.EndingDate,
+		},
+	}, nil
 }

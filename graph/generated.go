@@ -40,6 +40,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Mutation() MutationResolver
+	Query() QueryResolver
 }
 
 type DirectiveRoot struct {
@@ -48,6 +49,20 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	AuthPayload struct {
 		User func(childComplexity int) int
+	}
+
+	GetUser struct {
+		AccountType func(childComplexity int) int
+		Email       func(childComplexity int) int
+		EndingDate  func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Username    func(childComplexity int) int
+	}
+
+	GetUserInfoResponse struct {
+		Message func(childComplexity int) int
+		Success func(childComplexity int) int
+		User    func(childComplexity int) int
 	}
 
 	LoginResponse struct {
@@ -61,6 +76,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		GetUserInfo func(childComplexity int) int
 	}
 
 	User struct {
@@ -73,6 +89,9 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	Register(ctx context.Context, username string, email string, password string) (*model.AuthPayload, error)
 	Login(ctx context.Context, email string, password string) (*model.LoginResponse, error)
+}
+type QueryResolver interface {
+	GetUserInfo(ctx context.Context) (*model.GetUserInfoResponse, error)
 }
 
 type executableSchema struct {
@@ -100,6 +119,56 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.AuthPayload.User(childComplexity), true
+
+	case "GetUser.account_type":
+		if e.complexity.GetUser.AccountType == nil {
+			break
+		}
+
+		return e.complexity.GetUser.AccountType(childComplexity), true
+	case "GetUser.email":
+		if e.complexity.GetUser.Email == nil {
+			break
+		}
+
+		return e.complexity.GetUser.Email(childComplexity), true
+	case "GetUser.ending_date":
+		if e.complexity.GetUser.EndingDate == nil {
+			break
+		}
+
+		return e.complexity.GetUser.EndingDate(childComplexity), true
+	case "GetUser.id":
+		if e.complexity.GetUser.ID == nil {
+			break
+		}
+
+		return e.complexity.GetUser.ID(childComplexity), true
+	case "GetUser.username":
+		if e.complexity.GetUser.Username == nil {
+			break
+		}
+
+		return e.complexity.GetUser.Username(childComplexity), true
+
+	case "GetUserInfoResponse.message":
+		if e.complexity.GetUserInfoResponse.Message == nil {
+			break
+		}
+
+		return e.complexity.GetUserInfoResponse.Message(childComplexity), true
+	case "GetUserInfoResponse.success":
+		if e.complexity.GetUserInfoResponse.Success == nil {
+			break
+		}
+
+		return e.complexity.GetUserInfoResponse.Success(childComplexity), true
+	case "GetUserInfoResponse.user":
+		if e.complexity.GetUserInfoResponse.User == nil {
+			break
+		}
+
+		return e.complexity.GetUserInfoResponse.User(childComplexity), true
 
 	case "LoginResponse.message":
 		if e.complexity.LoginResponse.Message == nil {
@@ -136,6 +205,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.Register(childComplexity, args["username"].(string), args["email"].(string), args["password"].(string)), true
+
+	case "Query.getUserInfo":
+		if e.complexity.Query.GetUserInfo == nil {
+			break
+		}
+
+		return e.complexity.Query.GetUserInfo(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -416,6 +492,250 @@ func (ec *executionContext) fieldContext_AuthPayload_user(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _GetUser_id(ctx context.Context, field graphql.CollectedField, obj *model.GetUser) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GetUser_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GetUser_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetUser_username(ctx context.Context, field graphql.CollectedField, obj *model.GetUser) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GetUser_username,
+		func(ctx context.Context) (any, error) {
+			return obj.Username, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GetUser_username(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetUser_email(ctx context.Context, field graphql.CollectedField, obj *model.GetUser) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GetUser_email,
+		func(ctx context.Context) (any, error) {
+			return obj.Email, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GetUser_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetUser_account_type(ctx context.Context, field graphql.CollectedField, obj *model.GetUser) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GetUser_account_type,
+		func(ctx context.Context) (any, error) {
+			return obj.AccountType, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GetUser_account_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetUser_ending_date(ctx context.Context, field graphql.CollectedField, obj *model.GetUser) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GetUser_ending_date,
+		func(ctx context.Context) (any, error) {
+			return obj.EndingDate, nil
+		},
+		nil,
+		ec.marshalODate2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_GetUser_ending_date(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Date does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetUserInfoResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.GetUserInfoResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GetUserInfoResponse_success,
+		func(ctx context.Context) (any, error) {
+			return obj.Success, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GetUserInfoResponse_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetUserInfoResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetUserInfoResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.GetUserInfoResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GetUserInfoResponse_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GetUserInfoResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetUserInfoResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetUserInfoResponse_user(ctx context.Context, field graphql.CollectedField, obj *model.GetUserInfoResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GetUserInfoResponse_user,
+		func(ctx context.Context) (any, error) {
+			return obj.User, nil
+		},
+		nil,
+		ec.marshalOGetUser2ᚖmusicᚑauthᚋgraphᚋmodelᚐGetUser,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_GetUserInfoResponse_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetUserInfoResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_GetUser_id(ctx, field)
+			case "username":
+				return ec.fieldContext_GetUser_username(ctx, field)
+			case "email":
+				return ec.fieldContext_GetUser_email(ctx, field)
+			case "account_type":
+				return ec.fieldContext_GetUser_account_type(ctx, field)
+			case "ending_date":
+				return ec.fieldContext_GetUser_ending_date(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GetUser", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _LoginResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.LoginResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -562,6 +882,43 @@ func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, fie
 	if fc.Args, err = ec.field_Mutation_login_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getUserInfo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getUserInfo,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().GetUserInfo(ctx)
+		},
+		nil,
+		ec.marshalNGetUserInfoResponse2ᚖmusicᚑauthᚋgraphᚋmodelᚐGetUserInfoResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getUserInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_GetUserInfoResponse_success(ctx, field)
+			case "message":
+				return ec.fieldContext_GetUserInfoResponse_message(ctx, field)
+			case "user":
+				return ec.fieldContext_GetUserInfoResponse_user(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GetUserInfoResponse", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -2254,6 +2611,108 @@ func (ec *executionContext) _AuthPayload(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var getUserImplementors = []string{"GetUser"}
+
+func (ec *executionContext) _GetUser(ctx context.Context, sel ast.SelectionSet, obj *model.GetUser) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, getUserImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetUser")
+		case "id":
+			out.Values[i] = ec._GetUser_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "username":
+			out.Values[i] = ec._GetUser_username(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "email":
+			out.Values[i] = ec._GetUser_email(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "account_type":
+			out.Values[i] = ec._GetUser_account_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ending_date":
+			out.Values[i] = ec._GetUser_ending_date(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var getUserInfoResponseImplementors = []string{"GetUserInfoResponse"}
+
+func (ec *executionContext) _GetUserInfoResponse(ctx context.Context, sel ast.SelectionSet, obj *model.GetUserInfoResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, getUserInfoResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetUserInfoResponse")
+		case "success":
+			out.Values[i] = ec._GetUserInfoResponse_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._GetUserInfoResponse_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "user":
+			out.Values[i] = ec._GetUserInfoResponse_user(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var loginResponseImplementors = []string{"LoginResponse"}
 
 func (ec *executionContext) _LoginResponse(ctx context.Context, sel ast.SelectionSet, obj *model.LoginResponse) graphql.Marshaler {
@@ -2373,6 +2832,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "getUserInfo":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUserInfo(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -2818,6 +3299,20 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNGetUserInfoResponse2musicᚑauthᚋgraphᚋmodelᚐGetUserInfoResponse(ctx context.Context, sel ast.SelectionSet, v model.GetUserInfoResponse) graphql.Marshaler {
+	return ec._GetUserInfoResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGetUserInfoResponse2ᚖmusicᚑauthᚋgraphᚋmodelᚐGetUserInfoResponse(ctx context.Context, sel ast.SelectionSet, v *model.GetUserInfoResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._GetUserInfoResponse(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3155,6 +3650,31 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalODate2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalODate2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalString(*v)
+	return res
+}
+
+func (ec *executionContext) marshalOGetUser2ᚖmusicᚑauthᚋgraphᚋmodelᚐGetUser(ctx context.Context, sel ast.SelectionSet, v *model.GetUser) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._GetUser(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {
