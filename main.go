@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"music-auth/graph"
+	"music-auth/internal/auth"
 	"net/http"
 	"os"
 
@@ -11,18 +13,41 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-const defaultPort = "8080"
-
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
+
+	if err := godotenv.Load(); err != nil {
+		log.Println("⚠️ No .env file found, using system environment variables")
 	}
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	db, err := auth.ConnectDB()
+
+	if err != nil {
+		fmt.Println("db error", err)
+	}
+
+	jwt_secret := os.Getenv("JWT_SECRET")
+
+	if jwt_secret == "" {
+		fmt.Println("jwt secret is required")
+	}
+
+	authService := auth.New(db, jwt_secret)
+
+	resolver := &graph.Resolver{AuthService: authService}
+
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+		AuthService: resolver.AuthService,
+	}}))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
