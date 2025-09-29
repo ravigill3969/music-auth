@@ -1,14 +1,17 @@
-// internal/middleware/response_writer.go
 package middleware
 
 import (
 	"context"
+	"music-auth/internal/common"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type responseWriterKey struct{}
+
+type userContextKey string
+const UserContextKey userContextKey = "user"
 
 func ResponseWriterMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -23,18 +26,17 @@ func GetResponseWriter(ctx context.Context) http.ResponseWriter {
 	}
 	return nil
 }
-
-type userContextKey struct{}
-
 func AuthMiddleware(secret []byte, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("auth_token")
 		if err != nil {
+			// No token, just continue (or block if auth required)
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
+		claims := &common.Claims{}
+		token, err := jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, jwt.ErrSignatureInvalid
 			}
@@ -42,23 +44,17 @@ func AuthMiddleware(secret []byte, next http.Handler) http.Handler {
 		})
 
 		if err != nil || !token.Valid {
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r) // or block with http.Error if strict auth
 			return
 		}
 
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		ctx := context.WithValue(r.Context(), userContextKey{}, claims)
+		// Put claims into context
+		ctx := context.WithValue(r.Context(), UserContextKey, claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// Helper to fetch claims inside resolvers
-func GetUserFromCtx(ctx context.Context) (jwt.MapClaims, bool) {
-	claims, ok := ctx.Value(userContextKey{}).(jwt.MapClaims)
-	return claims, ok
+func GetUserFromContext(ctx context.Context) (*common.Claims, bool) {
+    claims, ok := ctx.Value(UserContextKey).(*common.Claims)
+    return claims, ok
 }

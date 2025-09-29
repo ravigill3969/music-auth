@@ -5,7 +5,7 @@ import (
 	"log"
 	"music-auth/graph"
 	"music-auth/internal/auth"
-	middleware "music-auth/internal/middlware"
+	"music-auth/internal/middleware"
 
 	"net/http"
 	"os"

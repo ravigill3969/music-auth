@@ -23,6 +23,20 @@ type GetUser {
   ending_date: Date
 }
 
+type BasicResponse {
+  success: Boolean!
+  message: String!
+}
+
+type Mutation {
+  register(username: String!, email: String!, password: String!): AuthPayload!
+  login(email: String!, password: String!): LoginResponse!
+  updatePassword(oldPassword: String!, newPassword: String!): BasicResponse!
+
+  updateEmail(newEmail: String!): BasicResponse!
+  updateUsername(newUsername: String!): BasicResponse!
+}
+
 type GetUserInfoResponse {
   success: Boolean!
   message: String!
@@ -31,9 +45,4 @@ type GetUserInfoResponse {
 
 type Query {
   getUserInfo: GetUserInfoResponse!
-}
-
-type Mutation {
-  register(username: String!, email: String!, password: String!): AuthPayload!
-  login(email: String!, password: String!): LoginResponse!
 }

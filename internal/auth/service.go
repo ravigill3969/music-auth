@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"music-auth/graph/model"
-	middleware "music-auth/internal/middlware"
+	"music-auth/internal/middleware"
 
 	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
@@ -17,14 +17,11 @@ type AuthService struct {
 	jwtSecret []byte
 }
 
-const HTTPRequest = "httpRequest"
-const HTTPResponseWriter = "httpResponseWriter"
-
 func New(db *sql.DB, jwt_secret string) *AuthService {
 	return &AuthService{db: db, jwtSecret: []byte(jwt_secret)}
 }
 
-func (a *AuthService) RegisterUser(username, email, password string) (string, *User, error) {
+func (a *AuthService) Register(username, email, password string) (string, *User, error) {
 
 	if username == "" || email == "" || password == "" {
 		return "", nil, fmt.Errorf("username, email and password, All fields are required")
@@ -93,8 +90,9 @@ func (a *AuthService) Login(email, password string) (string, error) {
 	return token, nil
 }
 
-func (r *AuthService) GetUserInfo(ctx context.Context) (*model.GetUserInfoResponse, error) {
-	claims, ok := middleware.GetUserFromCtx(ctx)
+func (a *AuthService) GetUserInfo(ctx context.Context) (*model.GetUserInfoResponse, error) {
+	claims, ok := middleware.GetUserFromContext(ctx)
+	fmt.Println(claims)
 	if !ok {
 		return &model.GetUserInfoResponse{
 			Success: false,
@@ -103,7 +101,7 @@ func (r *AuthService) GetUserInfo(ctx context.Context) (*model.GetUserInfoRespon
 		}, nil
 	}
 
-	userID := claims["user_id"].(string)
+	userID := claims.UserID
 
 	query := `
     SELECT id, username, email, subscription_type, ending_subscription_date
@@ -112,7 +110,7 @@ func (r *AuthService) GetUserInfo(ctx context.Context) (*model.GetUserInfoRespon
 `
 
 	var user model.GetUser
-	err := r.db.QueryRow(query, userID).Scan(
+	err := a.db.QueryRow(query, userID).Scan(
 		&user.ID,
 		&user.Username,
 		&user.Email,
@@ -136,4 +134,104 @@ func (r *AuthService) GetUserInfo(ctx context.Context) (*model.GetUserInfoRespon
 			EndingDate:  user.EndingDate,
 		},
 	}, nil
+}
+
+func (a *AuthService) UpdatePassword(ctx context.Context, oldPassword, newPassword string) (*model.BasicResponse, error) {
+	claims, ok := middleware.GetUserFromContext(ctx)
+
+	if !ok {
+		return nil, fmt.Errorf("Unauthorized")
+	}
+
+	userID := claims.UserID
+
+	query := `SELECT password FROM users WHERE id = $1`
+
+	res := a.db.QueryRow(query, userID)
+
+	var password string
+	err := res.Scan(&password)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("unable to update password, try again later")
+		}
+
+		return nil, fmt.Errorf("internal server error")
+	}
+
+	ok = CheckPasswordHash(oldPassword, password)
+
+	if !ok {
+		return nil, fmt.Errorf("passwords donot match")
+	}
+
+	hashedPassword, err := HashPassword(newPassword)
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to update password, try again later")
+	}
+
+	query = `UPDATE users SET password = $1 WHERE id = $2`
+
+	_, err = a.db.Exec(query, userID, hashedPassword)
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to update password, try again later")
+	}
+
+	return &model.BasicResponse{
+		Success: true,
+		Message: "Password updated",
+	}, nil
+}
+
+func (a *AuthService) UpdateEmail(ctx context.Context, newEmail string) error {
+	claims, ok := middleware.GetUserFromContext(ctx)
+
+	if !ok {
+		return fmt.Errorf("Unauthorized")
+	}
+
+	userID := claims.UserID
+
+	query := `UPDATE users SET email = $1 WHERE id = $2`
+
+	_, err := a.db.Exec(query, newEmail, userID)
+
+	if err != nil {
+		return fmt.Errorf("email update unsuccessfull, try again later")
+	}
+
+	return nil
+
+}
+
+func (a *AuthService) UpdateUsername(ctx context.Context, newUsername string) error {
+
+	claims, ok := middleware.GetUserFromContext(ctx)
+
+	if !ok {
+		return fmt.Errorf("Unauthorized")
+	}
+
+	userID := claims.UserID
+
+	query := `UPDATE users SET username = $1 WHERE id = $2`
+
+	result, err := a.db.Exec(query, newUsername, userID)
+	if err != nil {
+		return fmt.Errorf("username update unsuccessful, try again later")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("username update unsuccessful, try again later")
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("username update unsuccessful, try again later")
+	}
+
+	return nil
 }

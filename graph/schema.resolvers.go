@@ -8,13 +8,13 @@ import (
 	"context"
 	"fmt"
 	"music-auth/graph/model"
-	middleware "music-auth/internal/middlware"
+	"music-auth/internal/middleware"
 	"net/http"
 )
 
 // Register is the resolver for the register field.
 func (r *mutationResolver) Register(ctx context.Context, username string, email string, password string) (*model.AuthPayload, error) {
-	token, user, err := r.AuthService.RegisterUser(username, email, password)
+	token, user, err := r.AuthService.Register(username, email, password)
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +74,8 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 func (r *queryResolver) GetUserInfo(ctx context.Context) (*model.GetUserInfoResponse, error) {
 	user, err := r.AuthService.GetUserInfo(ctx)
 
+	fmt.Println(user)
+
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +87,53 @@ func (r *queryResolver) GetUserInfo(ctx context.Context) (*model.GetUserInfoResp
 	}, nil
 }
 
+// UpdatePassword is the resolver for the updatePassword field.
+func (r *mutationResolver) UpdatePassword(ctx context.Context, oldPassword string, newPassword string) (*model.BasicResponse, error) {
+	res, err := r.AuthService.UpdatePassword(ctx, oldPassword, newPassword)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.BasicResponse{
+		Success: res.Success,
+		Message: res.Message,
+	}, nil
+}
+
+// Pending -------------- ||
+//                       \  /
+//	   					  \/
+//
+
+// UpdateEmail is the resolver for the updateEmail field.
+func (r *mutationResolver) UpdateEmail(ctx context.Context, newEmail string) (*model.BasicResponse, error) {
+	err := r.AuthService.UpdateEmail(ctx, newEmail)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.BasicResponse{
+		Success: true,
+		Message: "email update successfully",
+	}, nil
+}
+
+// UpdateUsername is the resolver for the updateUsername field.
+func (r *mutationResolver) UpdateUsername(ctx context.Context, newUsername string) (*model.BasicResponse, error) {
+	err := r.AuthService.UpdateUsername(ctx, newUsername)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.BasicResponse{
+		Success: true,
+		Message: "username update successfull",
+	}, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -93,15 +142,3 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *mutationResolver) GetUserInfo(ctx context.Context) (*model.GetUserInfoResponse, error) {
-	panic(fmt.Errorf("not implemented: GetUserInfo - getUserInfo"))
-}
-*/
