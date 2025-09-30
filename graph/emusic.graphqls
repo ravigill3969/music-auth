@@ -7,18 +7,8 @@ type PresignedURL {
   expiresAt: DateTime!
 }
 
-type Track {
-  id: UUID!
-  albumId: UUID
-  title: String!
-  artist: String
-  genre: String
-  duration: Int
-  fileSize: Int
-  format: String
-  key: String!
-  createdAt: DateTime!
-}
+
+
 
 extend type Mutation {
   # Step 1: Get presigned URL for upload
@@ -27,7 +17,6 @@ extend type Mutation {
     contentType: String!
   ): PresignedURL!
 
-  # Step 2: Save metadata in DB
   saveTrack(
     albumId: UUID
     title: String!
@@ -37,5 +26,5 @@ extend type Mutation {
     fileSize: Int
     format: String!
     key: String!
-  ): Track!
+  ): BasicResponse!
 }

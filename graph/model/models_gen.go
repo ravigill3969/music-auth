@@ -2,10 +2,6 @@
 
 package model
 
-import (
-	"github.com/google/uuid"
-)
-
 type AuthPayload struct {
 	User *User `json:"user"`
 }
@@ -44,19 +40,6 @@ type PresignedURL struct {
 }
 
 type Query struct {
-}
-
-type Track struct {
-	ID        uuid.UUID  `json:"id"`
-	AlbumID   *uuid.UUID `json:"albumId,omitempty"`
-	Title     string     `json:"title"`
-	Artist    *string    `json:"artist,omitempty"`
-	Genre     *string    `json:"genre,omitempty"`
-	Duration  *int32     `json:"duration,omitempty"`
-	FileSize  *int32     `json:"fileSize,omitempty"`
-	Format    *string    `json:"format,omitempty"`
-	Key       string     `json:"key"`
-	CreatedAt string     `json:"createdAt"`
 }
 
 type User struct {

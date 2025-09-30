@@ -27,23 +27,17 @@ func (r *mutationResolver) GetPresignedURLForUploadingTrack(ctx context.Context,
 }
 
 // SaveTrack is the resolver for the saveTrack field.
-func (r *mutationResolver) SaveTrack(ctx context.Context, albumID *uuid.UUID, title string, artist *string, genre *string, duration *int32, fileSize *int32, format string, key string) (*model.Track, error) {
+func (r *mutationResolver) SaveTrack(ctx context.Context, albumID *uuid.UUID, title string, artist *string, genre *string, duration *int32, fileSize *int32, format string, key string) (*model.BasicResponse, error) {
 	err := r.MusicService.SaveTrackInDB(ctx, albumID, title, *artist, *genre, format, key, *duration, *fileSize)
 
 	if err != nil {
 		return nil, fmt.Errorf("%s", err.Error())
 	}
 
-	res :=&model.Track{
-		Title:  title,
-		Artist: artist,
-		Format: &format,
-		Genre: genre,
-		Duration: duration,
+	res := &model.BasicResponse{
+		Success: true,
+		Message: "Track upload successfull",
 	}
 
-	if albumID != nil{
-		res.AlbumID = albumID
-	}
-	return res , nil
+	return res, nil
 }

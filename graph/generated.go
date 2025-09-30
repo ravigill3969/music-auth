@@ -96,19 +96,6 @@ type ComplexityRoot struct {
 		GetUserInfo func(childComplexity int) int
 	}
 
-	Track struct {
-		AlbumID   func(childComplexity int) int
-		Artist    func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		Duration  func(childComplexity int) int
-		FileSize  func(childComplexity int) int
-		Format    func(childComplexity int) int
-		Genre     func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Key       func(childComplexity int) int
-		Title     func(childComplexity int) int
-	}
-
 	User struct {
 		Email    func(childComplexity int) int
 		ID       func(childComplexity int) int
@@ -123,7 +110,7 @@ type MutationResolver interface {
 	UpdateEmail(ctx context.Context, newEmail string) (*model.BasicResponse, error)
 	UpdateUsername(ctx context.Context, newUsername string) (*model.BasicResponse, error)
 	GetPresignedURLForUploadingTrack(ctx context.Context, name string, contentType string) (*model.PresignedURL, error)
-	SaveTrack(ctx context.Context, albumID *uuid.UUID, title string, artist *string, genre *string, duration *int32, fileSize *int32, format string, key string) (*model.Track, error)
+	SaveTrack(ctx context.Context, albumID *uuid.UUID, title string, artist *string, genre *string, duration *int32, fileSize *int32, format string, key string) (*model.BasicResponse, error)
 }
 type QueryResolver interface {
 	GetUserInfo(ctx context.Context) (*model.GetUserInfoResponse, error)
@@ -334,67 +321,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.GetUserInfo(childComplexity), true
-
-	case "Track.albumId":
-		if e.complexity.Track.AlbumID == nil {
-			break
-		}
-
-		return e.complexity.Track.AlbumID(childComplexity), true
-	case "Track.artist":
-		if e.complexity.Track.Artist == nil {
-			break
-		}
-
-		return e.complexity.Track.Artist(childComplexity), true
-	case "Track.createdAt":
-		if e.complexity.Track.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.Track.CreatedAt(childComplexity), true
-	case "Track.duration":
-		if e.complexity.Track.Duration == nil {
-			break
-		}
-
-		return e.complexity.Track.Duration(childComplexity), true
-	case "Track.fileSize":
-		if e.complexity.Track.FileSize == nil {
-			break
-		}
-
-		return e.complexity.Track.FileSize(childComplexity), true
-	case "Track.format":
-		if e.complexity.Track.Format == nil {
-			break
-		}
-
-		return e.complexity.Track.Format(childComplexity), true
-	case "Track.genre":
-		if e.complexity.Track.Genre == nil {
-			break
-		}
-
-		return e.complexity.Track.Genre(childComplexity), true
-	case "Track.id":
-		if e.complexity.Track.ID == nil {
-			break
-		}
-
-		return e.complexity.Track.ID(childComplexity), true
-	case "Track.key":
-		if e.complexity.Track.Key == nil {
-			break
-		}
-
-		return e.complexity.Track.Key(childComplexity), true
-	case "Track.title":
-		if e.complexity.Track.Title == nil {
-			break
-		}
-
-		return e.complexity.Track.Title(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -1429,7 +1355,7 @@ func (ec *executionContext) _Mutation_saveTrack(ctx context.Context, field graph
 			return ec.resolvers.Mutation().SaveTrack(ctx, fc.Args["albumId"].(*uuid.UUID), fc.Args["title"].(string), fc.Args["artist"].(*string), fc.Args["genre"].(*string), fc.Args["duration"].(*int32), fc.Args["fileSize"].(*int32), fc.Args["format"].(string), fc.Args["key"].(string))
 		},
 		nil,
-		ec.marshalNTrack2ᚖmusicᚑauthᚋgraphᚋmodelᚐTrack,
+		ec.marshalNBasicResponse2ᚖmusicᚑauthᚋgraphᚋmodelᚐBasicResponse,
 		true,
 		true,
 	)
@@ -1443,28 +1369,12 @@ func (ec *executionContext) fieldContext_Mutation_saveTrack(ctx context.Context,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Track_id(ctx, field)
-			case "albumId":
-				return ec.fieldContext_Track_albumId(ctx, field)
-			case "title":
-				return ec.fieldContext_Track_title(ctx, field)
-			case "artist":
-				return ec.fieldContext_Track_artist(ctx, field)
-			case "genre":
-				return ec.fieldContext_Track_genre(ctx, field)
-			case "duration":
-				return ec.fieldContext_Track_duration(ctx, field)
-			case "fileSize":
-				return ec.fieldContext_Track_fileSize(ctx, field)
-			case "format":
-				return ec.fieldContext_Track_format(ctx, field)
-			case "key":
-				return ec.fieldContext_Track_key(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Track_createdAt(ctx, field)
+			case "success":
+				return ec.fieldContext_BasicResponse_success(ctx, field)
+			case "message":
+				return ec.fieldContext_BasicResponse_message(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Track", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type BasicResponse", field.Name)
 		},
 	}
 	defer func() {
@@ -1708,296 +1618,6 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Track_id(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Track_id,
-		func(ctx context.Context) (any, error) {
-			return obj.ID, nil
-		},
-		nil,
-		ec.marshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Track_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Track",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type UUID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Track_albumId(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Track_albumId,
-		func(ctx context.Context) (any, error) {
-			return obj.AlbumID, nil
-		},
-		nil,
-		ec.marshalOUUID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Track_albumId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Track",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type UUID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Track_title(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Track_title,
-		func(ctx context.Context) (any, error) {
-			return obj.Title, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Track_title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Track",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Track_artist(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Track_artist,
-		func(ctx context.Context) (any, error) {
-			return obj.Artist, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Track_artist(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Track",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Track_genre(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Track_genre,
-		func(ctx context.Context) (any, error) {
-			return obj.Genre, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Track_genre(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Track",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Track_duration(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Track_duration,
-		func(ctx context.Context) (any, error) {
-			return obj.Duration, nil
-		},
-		nil,
-		ec.marshalOInt2ᚖint32,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Track_duration(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Track",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Track_fileSize(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Track_fileSize,
-		func(ctx context.Context) (any, error) {
-			return obj.FileSize, nil
-		},
-		nil,
-		ec.marshalOInt2ᚖint32,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Track_fileSize(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Track",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Track_format(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Track_format,
-		func(ctx context.Context) (any, error) {
-			return obj.Format, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Track_format(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Track",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Track_key(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Track_key,
-		func(ctx context.Context) (any, error) {
-			return obj.Key, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Track_key(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Track",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Track_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Track_createdAt,
-		func(ctx context.Context) (any, error) {
-			return obj.CreatedAt, nil
-		},
-		nil,
-		ec.marshalNDateTime2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Track_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Track",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type DateTime does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3985,72 +3605,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var trackImplementors = []string{"Track"}
-
-func (ec *executionContext) _Track(ctx context.Context, sel ast.SelectionSet, obj *model.Track) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, trackImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Track")
-		case "id":
-			out.Values[i] = ec._Track_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "albumId":
-			out.Values[i] = ec._Track_albumId(ctx, field, obj)
-		case "title":
-			out.Values[i] = ec._Track_title(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "artist":
-			out.Values[i] = ec._Track_artist(ctx, field, obj)
-		case "genre":
-			out.Values[i] = ec._Track_genre(ctx, field, obj)
-		case "duration":
-			out.Values[i] = ec._Track_duration(ctx, field, obj)
-		case "fileSize":
-			out.Values[i] = ec._Track_fileSize(ctx, field, obj)
-		case "format":
-			out.Values[i] = ec._Track_format(ctx, field, obj)
-		case "key":
-			out.Values[i] = ec._Track_key(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createdAt":
-			out.Values[i] = ec._Track_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
 var userImplementors = []string{"User"}
 
 func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *model.User) graphql.Marshaler {
@@ -4561,36 +4115,6 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	_ = sel
 	res := graphql.MarshalString(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) marshalNTrack2musicᚑauthᚋgraphᚋmodelᚐTrack(ctx context.Context, sel ast.SelectionSet, v model.Track) graphql.Marshaler {
-	return ec._Track(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNTrack2ᚖmusicᚑauthᚋgraphᚋmodelᚐTrack(ctx context.Context, sel ast.SelectionSet, v *model.Track) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._Track(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx context.Context, v any) (uuid.UUID, error) {
-	res, err := graphql.UnmarshalUUID(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx context.Context, sel ast.SelectionSet, v uuid.UUID) graphql.Marshaler {
-	_ = sel
-	res := graphql.MarshalUUID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
