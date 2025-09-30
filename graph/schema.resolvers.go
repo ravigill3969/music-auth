@@ -70,23 +70,6 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	}, nil
 }
 
-// GetUserInfo is the resolver for the getUserInfo field.
-func (r *queryResolver) GetUserInfo(ctx context.Context) (*model.GetUserInfoResponse, error) {
-	user, err := r.AuthService.GetUserInfo(ctx)
-
-	fmt.Println(user)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.GetUserInfoResponse{
-		Success: true,
-		Message: "User info reterieved",
-		User:    user.User,
-	}, nil
-}
-
 // UpdatePassword is the resolver for the updatePassword field.
 func (r *mutationResolver) UpdatePassword(ctx context.Context, oldPassword string, newPassword string) (*model.BasicResponse, error) {
 	res, err := r.AuthService.UpdatePassword(ctx, oldPassword, newPassword)
@@ -100,11 +83,6 @@ func (r *mutationResolver) UpdatePassword(ctx context.Context, oldPassword strin
 		Message: res.Message,
 	}, nil
 }
-
-// Pending -------------- ||
-//                       \  /
-//	   					  \/
-//
 
 // UpdateEmail is the resolver for the updateEmail field.
 func (r *mutationResolver) UpdateEmail(ctx context.Context, newEmail string) (*model.BasicResponse, error) {
@@ -131,6 +109,23 @@ func (r *mutationResolver) UpdateUsername(ctx context.Context, newUsername strin
 	return &model.BasicResponse{
 		Success: true,
 		Message: "username update successfull",
+	}, nil
+}
+
+// GetUserInfo is the resolver for the getUserInfo field.
+func (r *queryResolver) GetUserInfo(ctx context.Context) (*model.GetUserInfoResponse, error) {
+	user, err := r.AuthService.GetUserInfo(ctx)
+
+	fmt.Println(user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.GetUserInfoResponse{
+		Success: true,
+		Message: "User info reterieved",
+		User:    user.User,
 	}, nil
 }
 

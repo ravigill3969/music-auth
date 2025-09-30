@@ -30,7 +30,6 @@ func AuthMiddleware(secret []byte, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("auth_token")
 		if err != nil {
-			// No token, just continue (or block if auth required)
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -44,11 +43,10 @@ func AuthMiddleware(secret []byte, next http.Handler) http.Handler {
 		})
 
 		if err != nil || !token.Valid {
-			next.ServeHTTP(w, r) // or block with http.Error if strict auth
+			next.ServeHTTP(w, r)
 			return
 		}
 
-		// Put claims into context
 		ctx := context.WithValue(r.Context(), UserContextKey, claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

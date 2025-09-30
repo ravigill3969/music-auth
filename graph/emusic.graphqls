@@ -1,0 +1,41 @@
+scalar UUID
+scalar DateTime
+
+type PresignedURL {
+  url: String!
+  key: String!
+  expiresAt: DateTime!
+}
+
+type Track {
+  id: UUID!
+  albumId: UUID
+  title: String!
+  artist: String
+  genre: String
+  duration: Int
+  fileSize: Int
+  format: String
+  key: String!
+  createdAt: DateTime!
+}
+
+extend type Mutation {
+  # Step 1: Get presigned URL for upload
+  getPresignedURLForUploadingTrack(
+    name: String!
+    contentType: String!
+  ): PresignedURL!
+
+  # Step 2: Save metadata in DB
+  saveTrack(
+    albumId: UUID
+    title: String!
+    artist: String
+    genre: String
+    duration: Int
+    fileSize: Int
+    format: String!
+    key: String!
+  ): Track!
+}

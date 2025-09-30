@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
+	"music-auth/global/db"
 	"music-auth/graph"
 	"music-auth/internal/auth"
 	"music-auth/internal/middleware"
+	"music-auth/music/aws"
+	music "music-auth/music/service"
 
 	"net/http"
 	"os"
@@ -22,19 +25,18 @@ import (
 
 func main() {
 
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Println("⚠️ No .env file found, using system environment variables")
 	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8081"
 	}
 
-	db, err := auth.ConnectDB()
-
+	db, err := db.ConnectDB()
 	if err != nil {
-		fmt.Println("db error", err)
+		log.Fatalf("❌ Failed to connect DB: %v", err)
 	}
 
 	jwt_secret := os.Getenv("JWT_SECRET")
@@ -43,9 +45,22 @@ func main() {
 		fmt.Println("jwt secret is required")
 	}
 
-	authService := auth.New(db, jwt_secret)
+	s3Client, uploadManager, bucketName, err := aws.InitAWS()
 
-	resolver := &graph.Resolver{AuthService: authService}
+	if err != nil {
+		log.Fatalf("Aws error: %v", err)
+	}
+
+	cdn := os.Getenv("AWS_CLOUDFRONT_CDN")
+
+	if cdn == "" {
+		fmt.Println("cdn is required")
+	}
+
+	authService := auth.New(db, jwt_secret)
+	musicService := music.New(db, uploadManager, s3Client, cdn, bucketName)
+
+	resolver := &graph.Resolver{AuthService: authService, MusicService: musicService}
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{
 		Resolvers: resolver,
@@ -62,8 +77,8 @@ func main() {
 		Cache: lru.New[string](100),
 	})
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query",
+	http.Handle("/", playground.Handler("GraphQL playground", "/service"))
+	http.Handle("/service",
 		middleware.ResponseWriterMiddleware(
 			middleware.AuthMiddleware([]byte(jwt_secret), srv),
 		),
